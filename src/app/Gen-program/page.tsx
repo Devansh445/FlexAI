@@ -1,7 +1,8 @@
 "use client";
-// import { Models, Voices } from "@vapi-ai/web";
+import { useMutation } from "convex/react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { api } from "../../../convex/_generated/api";
 import { vapi } from "@/lib/vapi";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
@@ -13,6 +14,16 @@ const GenProgram = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [messages, setMessages] = useState<any[]>([]);
   const [callEnded, setCallEnded] = useState(false);
+  const [convexUserId, setConvexUserId] = useState<string | null>(null);
+
+  // Use effect to get convexUserId from localStorage on the client-side only
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      // This code runs only on the client side
+      const userId = localStorage.getItem("convexUserId");
+      setConvexUserId(userId);
+    }
+  }, []);
 
   const { user } = useUser();
   const router = useRouter();
@@ -129,6 +140,7 @@ const GenProgram = () => {
   }, []);
 
 
+
 const toggleCall = async () => {
   if (callActive) {
     vapi.stop();
@@ -146,11 +158,12 @@ const toggleCall = async () => {
         : user?.firstName || "There";
 
     await vapi.start(process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID!, {
+      
       model: { provider: "openai", model: "gpt-4.1-mini" },
       voice: { provider: "11labs", voiceId: "kIfcKu9kr8RZrbz7H3ox" }, 
       variableValues: {
         full_name: fullName,
-        user_id: user?.id,
+        user_id: convexUserId,
   },
 });
   } catch (error) {
@@ -159,6 +172,10 @@ const toggleCall = async () => {
     setConnecting(false);
   }
 };
+
+// const convexUserId = localStorage.getItem("convexUserId");
+
+const createPlan = useMutation(api.plan.createPlan);
 
 
   return (

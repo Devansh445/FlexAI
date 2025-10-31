@@ -11,12 +11,13 @@ export const syncUser = mutation({
   handler: async (ctx, args) => {
     const existingUser = await ctx.db
       .query("users")
-      .filter((q) => q.eq(q.field("clerkId"), args.clerkId))
-      .first();
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
+      .unique();
 
-    if (existingUser) return;
+    if (existingUser) return existingUser._id;
 
-    return await ctx.db.insert("users", args);
+    const newUserId = await ctx.db.insert("users", args);
+    return newUserId;
   },
 });
 

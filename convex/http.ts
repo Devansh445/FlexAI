@@ -3,10 +3,12 @@ import { WebhookEvent } from "@clerk/nextjs/server";
 import { Webhook } from "svix";
 import { api } from "./_generated/api";
 import { httpAction } from "./_generated/server";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const http = httpRouter();
+const genAI = process.env.GEMINI_API_KEY!;
 
-// ✅ CLERK WEBHOOK
+//  CLERK WEBHOOK
 http.route({
   path: "/clerk-webhook",
   method: "POST",
@@ -70,7 +72,7 @@ http.route({
   }),
 });
 
-// ✅ SAVE AI-GENERATED PLAN (from Vapi)
+//  SAVE AI-GENERATED PLAN (from Vapi)
 http.route({
   path: "/vapi/generate-program",
   method: "POST",
